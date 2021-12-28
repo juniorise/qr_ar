@@ -12,8 +12,8 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   camera: ^0.9.4+5
-  tflite: ^1.1.2
-  arcore_flutter_plugin: ^0.0.11
+  tflite_flutter: 0.9.0
+  tflite_flutter_helper: ^0.3.1
 
 dev_dependencies:
   flutter_test:
@@ -24,6 +24,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+    - assets/model/object_detect/
   fonts:
     - family: Quicksand
       fonts:
