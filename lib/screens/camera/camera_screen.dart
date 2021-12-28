@@ -1,8 +1,8 @@
-import 'package:camera/camera.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_ar/main.dart';
-import 'dart:math' as math;
+import 'package:qr_ar/screens/camera/local_widgets/box_widgets.dart';
+import 'package:qr_ar/screens/camera/local_widgets/camera_view.dart';
+import 'package:qr_ar/tflite/recognition.dart';
+import 'package:qr_ar/tflite/stats.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({Key? key}) : super(key: key);
@@ -12,45 +12,69 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  late CameraController controller;
+  late ValueNotifier<List<Recognition>> resultNotifier;
+  late ValueNotifier<Stats?> statsNotifier;
 
   @override
   void initState() {
-    controller = CameraController(
-      cameras[0],
-      ResolutionPreset.max,
-    );
-
-    controller.initialize().then((_) {
-      if (!mounted) return;
-      setState(() {});
-
-      controller.startImageStream((image) {
-        // print(image.planes.map((e) => e.));
-      });
-    });
-
+    resultNotifier = ValueNotifier([]);
+    statsNotifier = ValueNotifier(null);
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: buildCamera(),
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+        title: const Text("Camera"),
+      ),
+      body: buildBody(),
+      bottomNavigationBar: buildBottomNavigation(),
     );
   }
 
-  Widget buildCamera() {
-    if (!controller.value.isInitialized) return const SizedBox();
-    return Center(
-      child: CameraPreview(controller),
+  Widget buildBody() {
+    return ValueListenableBuilder<List<Recognition>>(
+      valueListenable: resultNotifier,
+      child: CameraView(
+        resultsCallback: (result) {
+          resultNotifier.value = result;
+        },
+        statsCallback: (stats) {
+          statsNotifier.value = stats;
+        },
+      ),
+      builder: (context, value, camera) {
+        return Stack(
+          children: [
+            camera ?? const SizedBox(),
+            ...resultNotifier.value.map((e) {
+              return BoxWidget(result: e);
+            }).toList()
+          ],
+        );
+      },
+    );
+  }
+
+  Widget buildBottomNavigation() {
+    return ValueListenableBuilder<Stats?>(
+      valueListenable: statsNotifier,
+      builder: (context, value, child) {
+        return SizedBox(
+          width: double.infinity,
+          height: kToolbarHeight,
+          child: Row(
+            children: [
+              Text(value?.inferenceTime.toString() ?? ""),
+              Text(value?.preProcessingTime.toString() ?? ""),
+              Text(value?.totalElapsedTime.toString() ?? ""),
+              Text(value?.totalPredictTime.toString() ?? ""),
+            ],
+          ),
+        );
+      },
     );
   }
 }
