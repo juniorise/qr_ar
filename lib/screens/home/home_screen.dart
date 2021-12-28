@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_ar/constants/config_constant.dart';
+import 'package:qr_ar/screens/camera/camera_screen.dart';
 import 'package:qr_ar/utils/qa_color.dart';
 import 'package:qr_ar/utils/qa_text_theme.dart';
 import 'package:qr_ar/widgets/qa_card.dart';
@@ -46,7 +47,11 @@ class HomeScreen extends StatelessWidget {
                   iconData: Icons.camera,
                   background: QaColor.of(context).primary,
                   foreground: QaColor.of(context).onPrimary,
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                      return const CameraScreen();
+                    }));
+                  },
                 ),
                 ConfigConstant.sizedBoxH1,
                 QaCard(
